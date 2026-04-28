@@ -28,18 +28,7 @@ import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePageStore } from '@/stores/page'
 import { useSpaceStore } from '@/stores/space'
-import { marked } from 'marked'
-import hljs from 'highlight.js'
-
-marked.use({
-  renderer: {
-    code({ text, lang }: { text: string; lang?: string }) {
-      const language = lang && hljs.getLanguage(lang) ? lang : 'plaintext'
-      const highlighted = hljs.highlight(text, { language }).value
-      return `<pre><code class="hljs language-${language}">${highlighted}</code></pre>`
-    },
-  },
-})
+import { renderMarkdown } from '@/utils/markdown'
 
 const route = useRoute()
 const router = useRouter()
@@ -51,9 +40,7 @@ const pageId = computed(() => Number(route.params.pageId))
 const spaceName = computed(() => spaceStore.currentSpace?.name ?? '空间')
 
 const renderedContent = computed(() => {
-  const content = pageStore.currentPage?.content
-  if (!content) return ''
-  return marked.parse(content) as string
+  return renderMarkdown(pageStore.currentPage?.content ?? '')
 })
 
 function loadPage() {
