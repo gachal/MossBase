@@ -1,0 +1,35 @@
+server:
+  port: 8090
+  mode: debug
+  cors_allowed_origins: []
+
+qdrant:
+  host: 127.0.0.1
+  port: 6334
+  api_key: ""
+  collection_prefix: "mossbase"
+
+embedding:
+  provider: openai
+  model: text-embedding-3-small
+  base_url: https://api.openai.com/v1
+  api_key: ""
+  dimensions: 1536
+  batch_size: 100
+  max_retries: 3
+
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+
+auth:
+  api_keys: []
+
+log:
+  level: info
+  output: stdout
+
+chunker:
+  chunk_size: 512
+  chunk_overlap: 64

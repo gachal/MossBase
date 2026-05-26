@@ -3,11 +3,13 @@
     <MdEditor
       v-model="internalContent"
       :editor-id="editorId"
+      :mdHeadingId="generateHeadingId"
       language="zh-CN"
       :theme="theme"
       :toolbars-exclude="excludedToolbars"
       @onHtmlChanged="handleHtmlChanged"
       @onUploadImg="handleUploadImage"
+      @onGetCatalog="handleGetCatalog"
     />
   </div>
 </template>
@@ -25,6 +27,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   'update:html': [value: string]
+  'update:catalog': [value: Array<{ text: string; level: number; id: string }>]
 }>()
 
 const editorId = 'moss-md-editor'
@@ -53,6 +56,20 @@ function handleHtmlChanged() {
 function handleUploadImage(_files: File[], _callback: (urls: string[]) => void) {
   // TODO: implement image upload to backend
 }
+
+function generateHeadingId(text: string, _level: number, index: number): string {
+  const base = text.toLowerCase().replace(/[^\w一-鿿]+/g, '-').replace(/^-|-$/g, '')
+  return index === 0 ? base : `${base}-${index}`
+}
+
+function handleGetCatalog(list: Array<{ text: string; level: number }>) {
+  const headings = list.map((item, index) => ({
+    text: item.text,
+    level: item.level,
+    id: generateHeadingId(item.text, item.level, index + 1),
+  }))
+  emit('update:catalog', headings)
+}
 </script>
 
 <style scoped>
@@ -64,6 +81,9 @@ function handleUploadImage(_files: File[], _callback: (urls: string[]) => void) 
 
 :deep(.md-editor) {
   border: none;
+  --md-color: #487330;
+  --md-color-hover: #3a5c26;
+  --md-color-active: #2e4a1d;
 }
 
 :deep(.md-editor-content) {

@@ -1,28 +1,31 @@
 <template>
-  <div class="page-editor" v-loading="pageStore.loading">
-    <template v-if="pageStore.currentPage">
-      <div class="editor-header">
-        <el-breadcrumb separator="/">
-          <el-breadcrumb-item :to="`/spaces/${spaceId}`">{{ spaceName }}</el-breadcrumb-item>
-          <el-breadcrumb-item :to="`/spaces/${spaceId}/pages/${pageId}`">{{ pageStore.currentPage.title }}</el-breadcrumb-item>
-        </el-breadcrumb>
-        <div class="editor-actions">
-          <span v-if="saving" class="save-status saving">保存中...</span>
-          <span v-else-if="lastSaved" class="save-status saved">已保存</span>
-          <el-button @click="handleSave" :loading="saving" type="primary">保存</el-button>
-          <el-button @click="router.push(`/spaces/${spaceId}/pages/${pageId}`)">取消</el-button>
+  <div class="page-editor-wrapper">
+    <div class="page-editor" v-loading="pageStore.loading">
+      <template v-if="pageStore.currentPage">
+        <div class="editor-header">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="`/spaces/${spaceId}`">{{ spaceName }}</el-breadcrumb-item>
+            <el-breadcrumb-item :to="`/spaces/${spaceId}/pages/${pageId}`">{{ pageStore.currentPage.title }}</el-breadcrumb-item>
+          </el-breadcrumb>
+          <div class="editor-actions">
+            <span v-if="saving" class="save-status saving">保存中...</span>
+            <span v-else-if="lastSaved" class="save-status saved">已保存</span>
+            <el-button @click="handleSave" :loading="saving" type="primary">保存</el-button>
+            <el-button @click="router.push(`/spaces/${spaceId}/pages/${pageId}`)">取消</el-button>
+          </div>
         </div>
-      </div>
 
-      <el-input
-        v-model="title"
-        class="title-input"
-        placeholder="页面标题"
-        size="large"
-      />
+        <el-input
+          v-model="title"
+          class="title-input"
+          placeholder="页面标题"
+          size="large"
+        />
 
-      <MarkdownEditor v-model="content" @update:html="contentHtml = $event" />
-    </template>
+        <MarkdownEditor v-model="content" @update:html="contentHtml = $event" @update:catalog="catalogHeadings = $event" />
+      </template>
+    </div>
+    <TocSidebar :headings="catalogHeadings" />
   </div>
 </template>
 
@@ -33,6 +36,7 @@ import { ElMessage } from 'element-plus'
 import { usePageStore } from '@/stores/page'
 import { useSpaceStore } from '@/stores/space'
 import MarkdownEditor from '@/components/editor/MarkdownEditor.vue'
+import TocSidebar from '@/components/common/TocSidebar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -46,6 +50,7 @@ const spaceName = computed(() => spaceStore.currentSpace?.name ?? '空间')
 const title = ref('')
 const content = ref('')
 const contentHtml = ref('')
+const catalogHeadings = ref<Array<{ text: string; level: number; id: string }>>([])
 const saving = ref(false)
 const lastSaved = ref(false)
 
@@ -120,7 +125,8 @@ async function handleSave() {
 </script>
 
 <style scoped>
-.page-editor { padding: 24px; max-width: 900px; }
+.page-editor-wrapper { display: flex; gap: 24px; }
+.page-editor { padding: 24px; max-width: 900px; flex: 1; min-width: 0; }
 .editor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .editor-actions { display: flex; align-items: center; gap: 8px; }
 .save-status { font-size: 12px; }

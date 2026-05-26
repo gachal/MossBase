@@ -1,0 +1,132 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mossbase-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: mossbase
+      MYSQL_CHARSET: utf8mb4
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mossbase-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: mossbase-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mossbase-net
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.4
+    container_name: mossbase-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - mossbase-net
+
+  rag:
+    build:
+      context: ./services/rag
+      dockerfile: Dockerfile
+    container_name: mossbase-rag
+    ports:
+      - "8090:8090"
+    environment:
+      RAG_SERVER_PORT: 8090
+      RAG_QDRANT_HOST: qdrant
+      RAG_QDRANT_PORT: 6334
+      RAG_REDIS_ADDR: redis:6379
+      RAG_EMBEDDING_API_KEY: ${OPENAI_API_KEY}
+      RAG_EMBEDDING_BASE_URL: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      RAG_AUTH_API_KEYS: ${RAG_API_KEY:?Set RAG_API_KEY in .env}
+      RAG_SERVER_CORS_ALLOWED_ORIGINS: ${RAG_CORS_ORIGINS:-}
+    depends_on:
+      - qdrant
+      - redis
+    networks:
+      - mossbase-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mossbase-backend
+    ports:
+      - "8033:8033"
+    environment:
+      MOSS_SERVER_PORT: 8033
+      MOSS_DATABASE_HOST: mysql
+      MOSS_DATABASE_PORT: 3306
+      MOSS_DATABASE_USERNAME: root
+      MOSS_DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MOSS_DATABASE_DBNAME: mossbase
+      MOSS_JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      MOSS_RAG_BASE_URL: http://rag:8090
+      MOSS_RAG_API_KEY: ${RAG_API_KEY:?Set RAG_API_KEY in .env}
+      MOSS_RAG_ENABLED: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - mossbase-net
+
+  mcp-server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mossbase-mcp-server
+    command: ["/usr/local/bin/mossbase-mcp-server"]
+    ports:
+      - "8095:8095"
+    environment:
+      MOSS_MCP_ENABLED: "true"
+      MOSS_MCP_TRANSPORT: http
+      MOSS_MCP_HTTP_PORT: 8095
+      MOSS_MCP_API_KEYS: ${MCP_API_KEY:?Set MCP_API_KEY in .env}
+      MOSS_DATABASE_HOST: mysql
+      MOSS_DATABASE_PORT: 3306
+      MOSS_DATABASE_USERNAME: root
+      MOSS_DATABASE_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MOSS_DATABASE_DBNAME: mossbase
+      MOSS_RAG_BASE_URL: http://rag:8090
+      MOSS_RAG_API_KEY: ${RAG_API_KEY:?Set RAG_API_KEY in .env}
+      MOSS_RAG_ENABLED: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - mossbase-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mossbase-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - mossbase-net
+
+volumes:
+  mysql_data:
+  qdrant_data:
+
+networks:
+  mossbase-net:
+    driver: bridge

@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS spaces (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(500) DEFAULT '',
+    icon VARCHAR(500) DEFAULT '',
+    visibility VARCHAR(20) NOT NULL DEFAULT 'private',
+    owner_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL,
+    INDEX idx_owner_id (owner_id),
+    INDEX idx_deleted_at (deleted_at),
+    CONSTRAINT fk_spaces_owner FOREIGN KEY (owner_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

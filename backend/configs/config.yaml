@@ -1,0 +1,30 @@
+server:
+    port: 8033
+    mode: release
+database:
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: a123456
+    dbname: mossbase
+    charset: utf8mb4
+    max_idle_conns: 10
+    max_open_conns: 100
+    log_level: warn
+jwt:
+    secret: 05bd1157c6edee064d8bb84702d1bea5a7a912cbf41ebdfde1cf0f7397656f1a
+    expiry_hours: 24
+log:
+    level: info
+    output: stdout
+rag:
+    enabled: false
+    base_url: ""
+    api_key: ""
+    timeout: 30
+mcp:
+    enabled: false
+    transport: stdio
+    http_port: 8095
+    api_keys: []
+    default_user_id: 0

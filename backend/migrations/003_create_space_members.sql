@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS space_members (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    space_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'member',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE INDEX idx_space_user (space_id, user_id),
+    CONSTRAINT fk_member_space FOREIGN KEY (space_id) REFERENCES spaces(id) ON DELETE CASCADE,
+    CONSTRAINT fk_member_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

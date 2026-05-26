@@ -1,25 +1,28 @@
 <template>
-  <div class="page-view" v-loading="pageStore.loading">
-    <template v-if="pageStore.currentPage">
-      <div class="page-header">
-        <el-breadcrumb separator="/">
-          <el-breadcrumb-item :to="`/spaces/${spaceId}`">{{ spaceName }}</el-breadcrumb-item>
-          <el-breadcrumb-item>{{ pageStore.currentPage.title }}</el-breadcrumb-item>
-        </el-breadcrumb>
-        <div class="page-actions">
-          <el-button type="primary" @click="router.push(`/spaces/${spaceId}/pages/${pageId}/edit`)">编辑</el-button>
+  <div class="page-view-wrapper">
+    <div class="page-view" v-loading="pageStore.loading">
+      <template v-if="pageStore.currentPage">
+        <div class="page-header">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item :to="`/spaces/${spaceId}`">{{ spaceName }}</el-breadcrumb-item>
+            <el-breadcrumb-item>{{ pageStore.currentPage.title }}</el-breadcrumb-item>
+          </el-breadcrumb>
+          <div class="page-actions">
+            <el-button type="primary" @click="router.push(`/spaces/${spaceId}/pages/${pageId}/edit`)">编辑</el-button>
+          </div>
         </div>
-      </div>
-      <h1 class="page-title">{{ pageStore.currentPage.title }}</h1>
-      <div class="page-meta">
-        <span>版本 {{ pageStore.currentPage.version }}</span>
-        <span>更新于 {{ formatDate(pageStore.currentPage.updated_at) }}</span>
-        <router-link :to="`/spaces/${spaceId}/pages/${pageId}/versions`">历史版本</router-link>
-      </div>
-      <el-divider />
-      <div class="page-content" v-html="renderedContent" />
-    </template>
-    <el-empty v-else-if="!pageStore.loading" description="页面不存在" />
+        <h1 class="page-title">{{ pageStore.currentPage.title }}</h1>
+        <div class="page-meta">
+          <span>版本 {{ pageStore.currentPage.version }}</span>
+          <span>更新于 {{ formatDate(pageStore.currentPage.updated_at) }}</span>
+          <router-link :to="`/spaces/${spaceId}/pages/${pageId}/versions`">历史版本</router-link>
+        </div>
+        <el-divider />
+        <div class="page-content" v-html="processed.html" />
+      </template>
+      <el-empty v-else-if="!pageStore.loading" description="页面不存在" />
+    </div>
+    <TocSidebar :headings="processed.headings" />
   </div>
 </template>
 
@@ -28,7 +31,8 @@ import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePageStore } from '@/stores/page'
 import { useSpaceStore } from '@/stores/space'
-import { renderMarkdown } from '@/utils/markdown'
+import { processMarkdown } from '@/utils/markdown'
+import TocSidebar from '@/components/common/TocSidebar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,9 +43,7 @@ const spaceId = computed(() => Number(route.params.id))
 const pageId = computed(() => Number(route.params.pageId))
 const spaceName = computed(() => spaceStore.currentSpace?.name ?? '空间')
 
-const renderedContent = computed(() => {
-  return renderMarkdown(pageStore.currentPage?.content ?? '')
-})
+const processed = computed(() => processMarkdown(pageStore.currentPage?.content ?? ''))
 
 function loadPage() {
   if (pageId.value) {
@@ -66,7 +68,8 @@ function formatDate(d: string) {
 </script>
 
 <style scoped>
-.page-view { padding: 24px; max-width: 900px; }
+.page-view-wrapper { display: flex; gap: 24px; }
+.page-view { padding: 24px; max-width: 900px; flex: 1; min-width: 0; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .page-title { margin: 0 0 8px; font-size: 28px; }
 .page-meta { display: flex; gap: 16px; font-size: 13px; color: var(--el-text-color-secondary); }
