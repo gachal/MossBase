@@ -80,15 +80,20 @@ func (h *SpaceToolHandler) GetSpace(ctx context.Context, req *mcpsdk.CallToolReq
 	return nil, toSpaceOutput(resp), nil
 }
 
+// MemberListResult wraps member list for SDK output schema compatibility.
+type MemberListResult struct {
+	Members []MemberOutput `json:"members"`
+}
+
 // ListMembers lists all members of a space (without email).
-func (h *SpaceToolHandler) ListMembers(ctx context.Context, req *mcpsdk.CallToolRequest, input ListMembersInput) (*mcpsdk.CallToolResult, []MemberOutput, error) {
+func (h *SpaceToolHandler) ListMembers(ctx context.Context, req *mcpsdk.CallToolRequest, input ListMembersInput) (*mcpsdk.CallToolResult, MemberListResult, error) {
 	if err := h.authz.checkRead(ctx, input.SpaceID); err != nil {
-		return nil, nil, err
+		return nil, MemberListResult{}, err
 	}
 
 	members, err := h.spaceSvc.ListMembers(ctx, input.SpaceID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to list members for space %d: %w", input.SpaceID, err)
+		return nil, MemberListResult{}, fmt.Errorf("failed to list members for space %d: %w", input.SpaceID, err)
 	}
 
 	outputs := make([]MemberOutput, len(members))
@@ -102,7 +107,7 @@ func (h *SpaceToolHandler) ListMembers(ctx context.Context, req *mcpsdk.CallTool
 		}
 	}
 
-	return nil, outputs, nil
+	return nil, MemberListResult{Members: outputs}, nil
 }
 
 // toSpaceOutput converts a dto.SpaceResponse to SpaceOutput.

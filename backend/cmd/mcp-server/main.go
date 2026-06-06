@@ -29,11 +29,19 @@ func main() {
 		log.Fatalf("load config: %v", err)
 	}
 
+	applogger.Init(cfg.Log.Level, cfg.Log.Output)
+
 	if !cfg.MCP.Enabled {
-		log.Fatal("MCP server is not enabled. Set MOSS_MCP_ENABLED=true or update config.yaml")
+		zap.L().Fatal("MCP server is not enabled. Set MOSS_MCP_ENABLED=true or update config.yaml")
 	}
 
-	applogger.Init(cfg.Log.Level, cfg.Log.Output)
+	zap.L().Info("MCP config loaded",
+		zap.Bool("enabled", cfg.MCP.Enabled),
+		zap.String("transport", cfg.MCP.Transport),
+		zap.Int("http_port", cfg.MCP.HTTPPort),
+		zap.Int("api_keys_count", len(cfg.MCP.APIKeys)),
+		zap.Uint64("default_user_id", cfg.MCP.DefaultUserID),
+	)
 
 	db, err := database.NewMySQL(cfg.Database)
 	if err != nil {

@@ -118,15 +118,15 @@ func (h *PageToolHandler) MovePage(ctx context.Context, req *mcpsdk.CallToolRequ
 }
 
 // GetPageTree returns the full page tree for a space.
-func (h *PageToolHandler) GetPageTree(ctx context.Context, req *mcpsdk.CallToolRequest, input GetPageTreeInput) (*mcpsdk.CallToolResult, []*PageTreeOutput, error) {
+func (h *PageToolHandler) GetPageTree(ctx context.Context, req *mcpsdk.CallToolRequest, input GetPageTreeInput) (*mcpsdk.CallToolResult, PageTreeResult, error) {
 	if err := h.authz.checkRead(ctx, input.SpaceID); err != nil {
-		return nil, nil, err
+		return nil, PageTreeResult{}, err
 	}
 
 	nodes, err := h.pageSvc.GetTreeBySpace(ctx, input.SpaceID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to get page tree for space %d: %w", input.SpaceID, err)
+		return nil, PageTreeResult{}, fmt.Errorf("failed to get page tree for space %d: %w", input.SpaceID, err)
 	}
 
-	return nil, toPageTreeOutputs(nodes), nil
+	return nil, PageTreeResult{Pages: toPageTreeOutputs(nodes)}, nil
 }

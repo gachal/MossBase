@@ -160,11 +160,11 @@ func TestSpaceToolHandler_ListMembers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result) != 2 {
-		t.Fatalf("expected 2 members, got %d", len(result))
+	if len(result.Members) != 2 {
+		t.Fatalf("expected 2 members, got %d", len(result.Members))
 	}
-	if result[0].Username != "admin" {
-		t.Errorf("expected first member 'admin', got %q", result[0].Username)
+	if result.Members[0].Username != "admin" {
+		t.Errorf("expected first member 'admin', got %q", result.Members[0].Username)
 	}
 }
 
@@ -182,9 +182,9 @@ func TestSpaceToolHandler_ListMembers_NoEmail(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result) != 1 {
-		t.Fatalf("expected 1 member, got %d", len(result))
+	if len(result.Members) != 1 {
+		t.Fatalf("expected 1 member, got %d", len(result.Members))
 	}
 	// MemberOutput type has no Email field — this verifies compilation
-	_ = result[0]
+	_ = result.Members[0]
 }

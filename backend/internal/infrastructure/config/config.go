@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -71,14 +73,48 @@ func Load(configPath string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	envBindings := map[string]string{
+		"server.port":         "MOSS_SERVER_PORT",
+		"server.mode":         "MOSS_SERVER_MODE",
+		"database.host":       "MOSS_DATABASE_HOST",
+		"database.port":       "MOSS_DATABASE_PORT",
+		"database.username":   "MOSS_DATABASE_USERNAME",
+		"database.password":   "MOSS_DATABASE_PASSWORD",
+		"database.dbname":     "MOSS_DATABASE_DBNAME",
+		"jwt.secret":          "MOSS_JWT_SECRET",
+		"jwt.expiry_hours":    "MOSS_JWT_EXPIRY_HOURS",
+		"log.level":           "MOSS_LOG_LEVEL",
+		"log.output":          "MOSS_LOG_OUTPUT",
+		"rag.enabled":         "MOSS_RAG_ENABLED",
+		"rag.base_url":        "MOSS_RAG_BASE_URL",
+		"rag.api_key":         "MOSS_RAG_API_KEY",
+		"rag.timeout":         "MOSS_RAG_TIMEOUT",
+		"mcp.enabled":         "MOSS_MCP_ENABLED",
+		"mcp.transport":       "MOSS_MCP_TRANSPORT",
+		"mcp.http_port":       "MOSS_MCP_HTTP_PORT",
+		"mcp.api_keys":        "MOSS_MCP_API_KEYS",
+		"mcp.default_user_id": "MOSS_MCP_DEFAULT_USER_ID",
+	}
+	for key, env := range envBindings {
+		_ = v.BindEnv(key, env)
+	}
+
 	if err := v.ReadInConfig(); err != nil {
 		return nil, fmt.Errorf("read config: %w", err)
 	}
 
 	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
+	if err := v.Unmarshal(&cfg, func(d *mapstructure.DecoderConfig) {
+		d.DecodeHook = mapstructure.ComposeDecodeHookFunc(
+			d.DecodeHook,
+			mapstructure.StringToSliceHookFunc(","),
+		)
+	}); err != nil {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
+
+	log.Printf("[config] mcp: enabled=%v transport=%s http_port=%d api_keys=%d default_user_id=%d",
+		cfg.MCP.Enabled, cfg.MCP.Transport, cfg.MCP.HTTPPort, len(cfg.MCP.APIKeys), cfg.MCP.DefaultUserID)
 
 	zap.L().Info("config loaded", zap.String("path", configPath))
 	return &cfg, nil

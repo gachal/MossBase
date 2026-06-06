@@ -311,10 +311,10 @@ func TestPageToolHandler_GetPageTree(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(result) != 1 {
-		t.Fatalf("expected 1 tree node, got %d", len(result))
+	if len(result.Pages) != 1 {
+		t.Fatalf("expected 1 tree node, got %d", len(result.Pages))
 	}
-	if result[0].Title != "Root" {
-		t.Errorf("expected title 'Root', got %q", result[0].Title)
+	if result.Pages[0].Title != "Root" {
+		t.Errorf("expected title 'Root', got %q", result.Pages[0].Title)
 	}
 }
