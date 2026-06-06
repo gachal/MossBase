@@ -28,6 +28,9 @@ func NewSearchToolHandler(pageSvc service.PageService, auth *MCPAuth, authz *spa
 
 // Search performs a full-text search for pages within a space.
 func (h *SearchToolHandler) Search(ctx context.Context, req *mcpsdk.CallToolRequest, input SearchInput) (*mcpsdk.CallToolResult, *dto.SearchResultResponse, error) {
+	if err := validateSpaceID(input.SpaceID); err != nil {
+		return nil, nil, err
+	}
 	if err := h.authz.checkRead(ctx, input.SpaceID); err != nil {
 		return nil, nil, err
 	}
@@ -57,6 +60,9 @@ func (h *SearchToolHandler) Search(ctx context.Context, req *mcpsdk.CallToolRequ
 
 // SemanticSearch performs a semantic (vector-based) search for pages within a space.
 func (h *SearchToolHandler) SemanticSearch(ctx context.Context, req *mcpsdk.CallToolRequest, input SemanticSearchInput) (*mcpsdk.CallToolResult, *dto.SemanticSearchResponse, error) {
+	if err := validateSpaceID(input.SpaceID); err != nil {
+		return nil, nil, err
+	}
 	if err := h.authz.checkRead(ctx, input.SpaceID); err != nil {
 		return nil, nil, err
 	}

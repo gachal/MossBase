@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -73,6 +72,8 @@ func Load(configPath string) (*Config, error) {
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
+	// Explicit BindEnv is required because Viper's AutomaticEnv + Unmarshal
+	// does not reliably override nested config file values with env vars.
 	envBindings := map[string]string{
 		"server.port":         "MOSS_SERVER_PORT",
 		"server.mode":         "MOSS_SERVER_MODE",
@@ -113,10 +114,11 @@ func Load(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 
-	log.Printf("[config] mcp: enabled=%v transport=%s http_port=%d api_keys=%d default_user_id=%d",
-		cfg.MCP.Enabled, cfg.MCP.Transport, cfg.MCP.HTTPPort, len(cfg.MCP.APIKeys), cfg.MCP.DefaultUserID)
-
-	zap.L().Info("config loaded", zap.String("path", configPath))
+	zap.L().Info("config loaded",
+		zap.String("path", configPath),
+		zap.Bool("mcp.enabled", cfg.MCP.Enabled),
+		zap.Int("mcp.api_keys_count", len(cfg.MCP.APIKeys)),
+	)
 	return &cfg, nil
 }
 

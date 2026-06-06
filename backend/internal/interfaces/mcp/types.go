@@ -1,7 +1,6 @@
 package mcp
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/gachal/mossbase/backend/internal/application/dto"
@@ -88,15 +87,16 @@ type PageOutput struct {
 }
 
 type PageTreeOutput struct {
-	ID       uint64          `json:"id"`
-	Title    string          `json:"title"`
-	Slug     string          `json:"slug"`
-	Status   string          `json:"status"`
-	Children json.RawMessage `json:"children,omitempty"`
+	ID       uint64 `json:"id"`
+	SpaceID  uint64 `json:"space_id"`
+	ParentID uint64 `json:"parent_id"`
+	Title    string `json:"title"`
+	Slug     string `json:"slug"`
+	Status   string `json:"status"`
 }
 
 type PageTreeResult struct {
-	Pages []*PageTreeOutput `json:"pages"`
+	Pages []PageTreeOutput `json:"pages"`
 }
 
 type SpaceOutput struct {
@@ -134,21 +134,22 @@ func toPageOutput(p *dto.PageResponse) PageOutput {
 	}
 }
 
-func toPageTreeOutputs(nodes []*dto.PageTreeResponse) []*PageTreeOutput {
-	result := make([]*PageTreeOutput, len(nodes))
-	for i, n := range nodes {
-		var children json.RawMessage
-		if len(n.Children) > 0 {
-			nested := toPageTreeOutputs(n.Children)
-			children, _ = json.Marshal(nested)
-		}
-		result[i] = &PageTreeOutput{
-			ID:       n.ID,
-			Title:    n.Title,
-			Slug:     n.Slug,
-			Status:   n.Status,
-			Children: children,
+func toPageTreeOutputs(nodes []*dto.PageTreeResponse) []PageTreeOutput {
+	var result []PageTreeOutput
+	var flatten func([]*dto.PageTreeResponse)
+	flatten = func(items []*dto.PageTreeResponse) {
+		for _, n := range items {
+			result = append(result, PageTreeOutput{
+				ID:       n.ID,
+				Title:    n.Title,
+				Slug:     n.Slug,
+				Status:   n.Status,
+			})
+			if len(n.Children) > 0 {
+				flatten(n.Children)
+			}
 		}
 	}
+	flatten(nodes)
 	return result
 }

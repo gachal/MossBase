@@ -68,6 +68,9 @@ func (h *SpaceToolHandler) ListSpaces(ctx context.Context, req *mcpsdk.CallToolR
 
 // GetSpace retrieves a single space by ID.
 func (h *SpaceToolHandler) GetSpace(ctx context.Context, req *mcpsdk.CallToolRequest, input GetSpaceInput) (*mcpsdk.CallToolResult, SpaceOutput, error) {
+	if err := validateSpaceID(input.SpaceID); err != nil {
+		return nil, SpaceOutput{}, err
+	}
 	if err := h.authz.checkRead(ctx, input.SpaceID); err != nil {
 		return nil, SpaceOutput{}, err
 	}
@@ -87,6 +90,9 @@ type MemberListResult struct {
 
 // ListMembers lists all members of a space (without email).
 func (h *SpaceToolHandler) ListMembers(ctx context.Context, req *mcpsdk.CallToolRequest, input ListMembersInput) (*mcpsdk.CallToolResult, MemberListResult, error) {
+	if err := validateSpaceID(input.SpaceID); err != nil {
+		return nil, MemberListResult{}, err
+	}
 	if err := h.authz.checkRead(ctx, input.SpaceID); err != nil {
 		return nil, MemberListResult{}, err
 	}
