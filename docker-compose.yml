@@ -7,7 +7,7 @@ services:
       MYSQL_DATABASE: mossbase
       MYSQL_CHARSET: utf8mb4
     ports:
-      - "3306:3306"
+      - "3303:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./backend/migrations:/docker-entrypoint-initdb.d
@@ -23,7 +23,7 @@ services:
     image: redis:7-alpine
     container_name: mossbase-redis
     ports:
-      - "6379:6379"
+      - "6383:6379"
     networks:
       - mossbase-net
 
@@ -117,7 +117,7 @@ services:
       dockerfile: Dockerfile
     container_name: mossbase-frontend
     ports:
-      - "80:80"
+      - "8034:80"
     depends_on:
       - backend
     networks:
