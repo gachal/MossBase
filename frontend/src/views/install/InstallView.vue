@@ -10,8 +10,12 @@
     <div class="step-content">
       <!-- Step 1: Database -->
       <el-form v-show="currentStep === 0" ref="dbFormRef" :model="dbForm" :rules="dbRules" label-position="top">
+        <el-alert type="info" :closable="false" style="margin-bottom: 16px">
+          Docker 部署：主机填 <strong>mysql</strong>，端口填 <strong>3306</strong>（容器内部端口）；
+          本地部署：主机填 <strong>127.0.0.1</strong>
+        </el-alert>
         <el-form-item label="主机地址" prop="host">
-          <el-input v-model="dbForm.host" placeholder="127.0.0.1" />
+          <el-input v-model="dbForm.host" placeholder="mysql" />
         </el-form-item>
         <el-form-item label="端口" prop="port">
           <el-input-number v-model="dbForm.port" :min="1" :max="65535" style="width: 100%" />
@@ -151,7 +155,7 @@ const currentStep = ref(0)
 
 // Step 1: Database
 const dbFormRef = ref<FormInstance>()
-const dbForm = reactive({ host: '127.0.0.1', port: 3306, username: 'root', password: '', dbname: 'mossbase' })
+const dbForm = reactive({ host: 'mysql', port: 3306, username: 'root', password: '', dbname: 'mossbase' })
 const dbRules: FormRules = {
   host: [{ required: true, message: '请输入主机地址', trigger: 'blur' }],
   port: [{ required: true, message: '请输入端口', trigger: 'blur' }],
@@ -212,7 +216,7 @@ const adminRules: FormRules = {
 
 // Step 3: Optional Services
 const mcpForm = reactive({ enabled: false, transport: 'stdio', http_port: 8095, api_keys: [] as string[] })
-const ragForm = reactive({ enabled: false, base_url: 'http://127.0.0.1:8090', api_key: '' })
+const ragForm = reactive({ enabled: false, base_url: 'http://rag:8090', api_key: '' })
 const mcpApiKeysText = ref('')
 
 // Step 4: Install

@@ -65,6 +65,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: mossbase-backend
+    restart: unless-stopped
     ports:
       - "8033:8033"
     environment:
@@ -89,6 +90,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: mossbase-mcp-server
+    restart: unless-stopped
     command: ["/usr/local/bin/mossbase-mcp-server"]
     ports:
       - "8095:8095"

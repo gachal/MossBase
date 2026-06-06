@@ -12,6 +12,7 @@ RUN apk add --no-cache ca-certificates tzdata
 COPY --from=builder /mossbase-server /usr/local/bin/
 COPY --from=builder /mossbase-mcp-server /usr/local/bin/
 COPY configs/config.yaml /app/configs/config.yaml
+COPY migrations/ /app/migrations/
 WORKDIR /app
 EXPOSE 8033
 CMD ["mossbase-server"]
