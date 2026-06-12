@@ -48,6 +48,7 @@ func (s *SpaceServiceImpl) Create(ctx context.Context, ownerID uint64, req dto.C
 		Name:        req.Name,
 		Description: req.Description,
 		Icon:        req.Icon,
+		Cover:       req.Cover,
 		Visibility:  entity.SpaceVisibility(visibility),
 		OwnerID:     ownerID,
 	}
@@ -82,6 +83,9 @@ func (s *SpaceServiceImpl) Update(ctx context.Context, spaceID uint64, req dto.U
 	}
 	if req.Icon != "" {
 		space.Icon = req.Icon
+	}
+	if req.Cover != "" {
+		space.Cover = req.Cover
 	}
 	if req.Visibility != "" {
 		space.Visibility = entity.SpaceVisibility(req.Visibility)
@@ -209,6 +213,7 @@ func toSpaceResponse(sp *entity.Space) dto.SpaceResponse {
 		Name:        sp.Name,
 		Description: sp.Description,
 		Icon:        sp.Icon,
+		Cover:       sp.Cover,
 		Visibility:  string(sp.Visibility),
 		OwnerID:     sp.OwnerID,
 		CreatedAt:   sp.CreatedAt,

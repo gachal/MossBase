@@ -14,6 +14,7 @@ type Space struct {
 	Name        string
 	Description string
 	Icon        string
+	Cover       string
 	Visibility  SpaceVisibility
 	OwnerID     uint64
 	CreatedAt   time.Time

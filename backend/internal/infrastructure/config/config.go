@@ -16,6 +16,13 @@ type Config struct {
 	Log      LogConfig      `mapstructure:"log" yaml:"log"`
 	RAG      RAGConfig      `mapstructure:"rag" yaml:"rag"`
 	MCP      MCPConfig      `mapstructure:"mcp" yaml:"mcp"`
+	Upload   UploadConfig   `mapstructure:"upload" yaml:"upload"`
+}
+
+type UploadConfig struct {
+	Dir       string `mapstructure:"dir" yaml:"dir"`
+	MaxSizeMB int    `mapstructure:"max_size_mb" yaml:"max_size_mb"`
+	BaseURL   string `mapstructure:"base_url" yaml:"base_url"`
 }
 
 type RAGConfig struct {
@@ -95,6 +102,9 @@ func Load(configPath string) (*Config, error) {
 		"mcp.http_port":       "MOSS_MCP_HTTP_PORT",
 		"mcp.api_keys":        "MOSS_MCP_API_KEYS",
 		"mcp.default_user_id": "MOSS_MCP_DEFAULT_USER_ID",
+		"upload.dir":          "MOSS_UPLOAD_DIR",
+		"upload.max_size_mb":  "MOSS_UPLOAD_MAX_SIZE_MB",
+		"upload.base_url":     "MOSS_UPLOAD_BASE_URL",
 	}
 	for key, env := range envBindings {
 		_ = v.BindEnv(key, env)

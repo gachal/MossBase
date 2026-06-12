@@ -126,12 +126,16 @@ func (s *InstallService) Execute(ctx context.Context, req dto.InstallRequest) er
 		}
 	}()
 
-	if err := migration.Run(targetDB, "migrations"); err != nil {
-		return fmt.Errorf("run migrations: %w", err)
-	}
+	if s.checkExistingData(targetDB) {
+		zap.L().Info("database already contains data, skipping migration and admin creation")
+	} else {
+		if err := migration.Run(targetDB, "migrations"); err != nil {
+			return fmt.Errorf("run migrations: %w", err)
+		}
 
-	if err := s.createAdminUser(targetDB, req.Admin); err != nil {
-		return fmt.Errorf("create admin user: %w", err)
+		if err := s.createAdminUser(targetDB, req.Admin); err != nil {
+			return fmt.Errorf("create admin user: %w", err)
+		}
 	}
 
 	secret, err := generateJWTSecret()
@@ -188,6 +192,12 @@ func (s *InstallService) createAdminUser(db *gorm.DB, admin dto.AdminInput) erro
 	`, admin.Email, admin.Username, passwordHash).Error
 }
 
+func (s *InstallService) checkExistingData(db *gorm.DB) bool {
+	var count int64
+	db.Raw("SELECT COUNT(*) FROM users WHERE role = 'admin'").Scan(&count)
+	return count > 0
+}
+
 func (s *InstallService) buildConfig(req dto.InstallRequest, jwtSecret string) *config.Config {
 	cfg := &config.Config{
 		Server: config.ServerConfig{
@@ -221,6 +231,11 @@ func (s *InstallService) buildConfig(req dto.InstallRequest, jwtSecret string) *
 			Enabled:   false,
 			Transport: "stdio",
 			HTTPPort:  8095,
+		},
+		Upload: config.UploadConfig{
+			Dir:       "./uploads",
+			MaxSizeMB: 5,
+			BaseURL:   "/uploads",
 		},
 	}
 

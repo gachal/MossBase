@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -39,6 +40,16 @@ func runNormalMode() {
 	}
 
 	applogger.Init(cfg.Log.Level, cfg.Log.Output)
+
+	// 确保上传目录存在
+	if cfg.Upload.Dir != "" {
+		if err := os.MkdirAll(filepath.Join(cfg.Upload.Dir, "avatars"), 0755); err != nil {
+			zap.L().Fatal("create upload dir", zap.Error(err))
+		}
+		if err := os.MkdirAll(filepath.Join(cfg.Upload.Dir, "spaces"), 0755); err != nil {
+			zap.L().Fatal("create upload dir", zap.Error(err))
+		}
+	}
 
 	db, err := database.NewMySQL(cfg.Database)
 	if err != nil {

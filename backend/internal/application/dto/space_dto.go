@@ -6,6 +6,7 @@ type CreateSpaceRequest struct {
 	Name        string `json:"name" binding:"required,min=1,max=100"`
 	Description string `json:"description" binding:"max=500"`
 	Icon        string `json:"icon" binding:"max=500"`
+	Cover       string `json:"cover" binding:"max=500"`
 	Visibility  string `json:"visibility" binding:"omitempty,oneof=private public"`
 }
 
@@ -13,6 +14,7 @@ type UpdateSpaceRequest struct {
 	Name        string `json:"name" binding:"omitempty,min=1,max=100"`
 	Description string `json:"description" binding:"max=500"`
 	Icon        string `json:"icon" binding:"max=500"`
+	Cover       string `json:"cover" binding:"max=500"`
 	Visibility  string `json:"visibility" binding:"omitempty,oneof=private public"`
 }
 
@@ -21,6 +23,7 @@ type SpaceResponse struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Icon        string    `json:"icon"`
+	Cover       string    `json:"cover"`
 	Visibility  string    `json:"visibility"`
 	OwnerID     uint64    `json:"owner_id"`
 	CreatedAt   time.Time `json:"created_at"`

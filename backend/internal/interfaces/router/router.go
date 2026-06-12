@@ -24,6 +24,15 @@ func Setup(
 	pageVersionRepo repository.PageVersionRepository,
 	ragClient *rag.RAGClient,
 ) {
+	// 静态文件服务（上传的图片）
+	if cfg.Upload.Dir != "" {
+		baseURL := cfg.Upload.BaseURL
+		if baseURL == "" {
+			baseURL = "/uploads"
+		}
+		engine.Static(baseURL, cfg.Upload.Dir)
+	}
+
 	api := engine.Group("/api/v1")
 
 	// Block install endpoints in normal mode
@@ -42,6 +51,7 @@ func Setup(
 	pageH := handler.NewPageHandler(pageSvc)
 	versionH := handler.NewPageVersionHandler(versionSvc)
 	adminH := handler.NewAdminHandler(adminSvc)
+	uploadH := handler.NewUploadHandler(&cfg.Upload)
 
 	// Public: auth
 	auth := api.Group("/auth")
@@ -57,6 +67,11 @@ func Setup(
 	user := authorized.Group("/user")
 	user.GET("/profile", userH.GetProfile)
 	user.PUT("/profile", userH.UpdateProfile)
+
+	// Upload
+	uploadGroup := authorized.Group("/upload")
+	uploadGroup.POST("/avatar", uploadH.UploadAvatar)
+	uploadGroup.POST("/space-cover", uploadH.UploadSpaceCover)
 
 	// Space routes
 	spaces := authorized.Group("/spaces")

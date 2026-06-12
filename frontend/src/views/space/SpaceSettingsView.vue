@@ -18,6 +18,9 @@
               <el-radio value="public">公开</el-radio>
             </el-radio-group>
           </el-form-item>
+          <el-form-item label="封面图片">
+            <ImageUpload v-model="form.cover" upload-type="space-cover" :preview-size="200" />
+          </el-form-item>
           <el-form-item>
             <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
           </el-form-item>
@@ -62,13 +65,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useSpaceStore } from '@/stores/space'
 import { updateSpace, deleteSpace, removeMember } from '@/api/space'
+import ImageUpload from '@/components/common/ImageUpload.vue'
 
 const route = useRoute()
 const router = useRouter()
 const spaceStore = useSpaceStore()
 const spaceId = computed(() => Number(route.params.id))
 const saving = ref(false)
-const form = reactive({ name: '', description: '', visibility: 'private' })
+const form = reactive({ name: '', description: '', visibility: 'private', cover: '' })
 
 onMounted(async () => {
   await spaceStore.fetchSpace(spaceId.value)
@@ -77,6 +81,7 @@ onMounted(async () => {
     form.name = spaceStore.currentSpace.name
     form.description = spaceStore.currentSpace.description
     form.visibility = spaceStore.currentSpace.visibility
+    form.cover = spaceStore.currentSpace.cover || ''
   }
 })
 

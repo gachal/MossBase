@@ -3,6 +3,7 @@ export interface Space {
   name: string
   description: string
   icon: string
+  cover: string
   visibility: 'private' | 'public'
   owner_id: number
   created_at: string
@@ -21,5 +22,6 @@ export interface CreateSpaceRequest {
   name: string
   description?: string
   icon?: string
+  cover?: string
   visibility?: string
 }

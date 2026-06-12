@@ -8,6 +8,7 @@
     <el-row :gutter="16" v-loading="spaceStore.loading">
       <el-col :span="8" v-for="space in spaceStore.spaces" :key="space.id">
         <el-card shadow="hover" class="space-card" @click="router.push(`/spaces/${space.id}`)">
+          <img v-if="space.cover" :src="space.cover" class="cover-image" />
           <template #header>
             <div class="card-header">
               <span>{{ space.name }}</span>
@@ -96,4 +97,5 @@ onMounted(() => spaceStore.fetchSpaces())
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .desc { color: #606266; font-size: 14px; margin: 0; }
 .meta { color: #909399; font-size: 12px; margin-top: 8px; }
+.cover-image { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
 </style>

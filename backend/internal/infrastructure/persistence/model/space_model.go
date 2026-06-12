@@ -12,6 +12,7 @@ type SpaceModel struct {
 	Name        string         `gorm:"size:100;not null" json:"name"`
 	Description string         `gorm:"size:500" json:"description"`
 	Icon        string         `gorm:"size:500" json:"icon"`
+	Cover       string         `gorm:"size:500" json:"cover"`
 	Visibility  string         `gorm:"size:20;default:private;not null" json:"visibility"`
 	OwnerID     uint64         `gorm:"column:owner_id;index;not null" json:"owner_id"`
 	CreatedAt   time.Time      `json:"created_at"`
@@ -27,6 +28,7 @@ func (m SpaceModel) ToEntity() *entity.Space {
 		Name:        m.Name,
 		Description: m.Description,
 		Icon:        m.Icon,
+		Cover:       m.Cover,
 		Visibility:  entity.SpaceVisibility(m.Visibility),
 		OwnerID:     m.OwnerID,
 		CreatedAt:   m.CreatedAt,
@@ -40,6 +42,7 @@ func FromSpaceEntity(e *entity.Space) *SpaceModel {
 		Name:        e.Name,
 		Description: e.Description,
 		Icon:        e.Icon,
+		Cover:       e.Cover,
 		Visibility:  string(e.Visibility),
 		OwnerID:     e.OwnerID,
 	}

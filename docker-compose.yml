@@ -79,6 +79,10 @@ services:
       MOSS_RAG_BASE_URL: http://rag:8090
       MOSS_RAG_API_KEY: ${RAG_API_KEY:?Set RAG_API_KEY in .env}
       MOSS_RAG_ENABLED: "true"
+      MOSS_UPLOAD_DIR: "./uploads"
+      MOSS_UPLOAD_BASE_URL: "/uploads"
+    volumes:
+      - upload_data:/app/uploads
     depends_on:
       mysql:
         condition: service_healthy
@@ -129,6 +133,7 @@ services:
 volumes:
   mysql_data:
   qdrant_data:
+  upload_data:
 
 networks:
   mossbase-net:
